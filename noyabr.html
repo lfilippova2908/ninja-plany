@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ноябрьские акции Ниндзя</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: шапка с итогами → фон месяца → календарь-сетка (пн–вс) → карточки акций по датам → розыгрыши → экономика → чек-лист Goulash */
+:root{
+  --bg:#f3f6f2; --surface:#ffffff; --surface2:#eaf0e9; --ink:#15211a; --muted:#5a6a60; --line:#d8e1d8;
+  --accent:#1c8c4c; --accent-soft:#dcefe2;
+  --promo:#c8571f; --promo-soft:#fbe7dc;
+  --raffle:#6d45c9; --raffle-soft:#ece5fb;
+  --sms:#2470a8; --sms-soft:#e0edf7;
+  --hol:#9a6a00; --hol-soft:#fbf0d2;
+  --f-display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body:"Onest", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1512; --surface:#17201b; --surface2:#1d2822; --ink:#e7efe9; --muted:#9aab9f; --line:#2b3830;
+  --accent:#5fd08e; --accent-soft:#1d3527;
+  --promo:#f08a52; --promo-soft:#3a2418;
+  --raffle:#a98bf0; --raffle-soft:#2a2240;
+  --sms:#6db3e8; --sms-soft:#172c3c;
+  --hol:#e3b847; --hol-soft:#332a12; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0f1512; --surface:#17201b; --surface2:#1d2822; --ink:#e7efe9; --muted:#9aab9f; --line:#2b3830;
+  --accent:#5fd08e; --accent-soft:#1d3527;
+  --promo:#f08a52; --promo-soft:#3a2418;
+  --raffle:#a98bf0; --raffle-soft:#2a2240;
+  --sms:#6db3e8; --sms-soft:#172c3c;
+  --hol:#e3b847; --hol-soft:#332a12; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:36px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(26px,5vw,40px);font-weight:700}
+h2{font-size:20px;font-weight:700}
+h3{font-size:15px;font-weight:600;font-family:var(--f-body)}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+section{display:grid;gap:14px}
+.sec-head{display:grid;gap:4px}
+
+/* header */
+header{display:grid;gap:14px}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:2px;min-width:0}
+.stat b{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+/* background mechanics */
+.bgrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.bgitem{background:var(--surface2);border-radius:10px;padding:12px 14px;display:grid;gap:4px;min-width:0}
+.bgitem p{font-size:13.5px}
+
+/* legend + chips */
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chip{display:block;font-size:11.5px;line-height:1.3;padding:3px 6px;border-radius:5px;text-decoration:none;font-weight:500}
+.c-promo{background:var(--promo-soft);color:var(--promo)}
+.c-raffle{background:var(--raffle-soft);color:var(--raffle)}
+.c-sms{background:var(--sms-soft);color:var(--sms)}
+.c-hol{background:var(--hol-soft);color:var(--hol)}
+a.chip:hover,a.chip:focus-visible{outline:2px solid currentColor;outline-offset:1px}
+
+/* calendar */
+.cal-scroll{overflow-x:auto}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(118px,1fr));gap:6px;min-width:860px}
+.dow{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 4px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;min-height:96px;display:flex;flex-direction:column;gap:4px}
+.day.off{background:transparent;border-style:dashed;opacity:.5}
+.day.we .num{color:var(--promo)}
+.num{font-family:var(--f-display);font-size:14px;font-variant-numeric:tabular-nums}
+
+/* cards */
+.list{display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:10px;scroll-margin-top:16px}
+.card:target{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.card-top{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline;justify-content:space-between}
+.when{font-family:var(--f-display);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;min-width:0}
+@media(max-width:560px){.kv{grid-template-columns:1fr;gap:2px}.kv dd{margin-bottom:6px}}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--surface2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.plat{display:inline-flex;gap:6px;flex-wrap:wrap}
+.plat span{font-size:11.5px;font-weight:700;border:1px solid var(--line);border-radius:99px;padding:1px 8px;color:var(--muted)}
+.copy{font-size:14px;background:var(--surface2);border-radius:8px;padding:10px 12px;white-space:pre-line}
+.k-promo{border-left:4px solid var(--promo)}
+.k-raffle{border-left:4px solid var(--raffle)}
+.k-sms{border-left:4px solid var(--sms)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tfoot td{font-weight:700}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px;min-width:0}
+.box ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:14px}
+.checks{list-style:none;padding:0!important}
+.checks li{display:flex;gap:8px;align-items:flex-start}
+.checks input{margin-top:4px;accent-color:var(--accent);width:16px;height:16px;flex:0 0 auto}
+.checks label{cursor:pointer}
+.foot{font-size:13px;color:var(--muted)}
+</style>
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<p style="max-width:1080px;margin:16px auto 0;padding-inline:16px;font-size:14px"><a href="index.html" style="color:var(--accent)">← Все планы</a></p>
+
+
+<div class="wrap">
+
+<header>
+  <span class="eyebrow">Ниндзя · Можга · ноябрь 2026</span>
+  <h1>План акций и розыгрышей на ноябрь</h1>
+  <p class="muted" style="max-width:68ch">Ноябрь привязан к датам, которые и так на слуху: 4 ноября, 11.11, пятница 13-е, Чёрная пятница и День матери. Между ними идёт неделя возврата спящих гостей по сегментам из Goulash. Розыгрыши разнесены по площадкам, чтобы каждую неделю что-то шло, а призы брались из меню.</p>
+  <div class="stats">
+    <div class="stat"><b>7</b><span>акций с промокодом</span></div>
+    <div class="stat"><b>6</b><span>розыгрышей на 4 площадках</span></div>
+    <div class="stat"><b>4</b><span>SMS-волны по сегментам</span></div>
+    <div class="stat"><b>≈1 760 ₽</b><span>себестоимость всех призов</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Работает весь месяц</span><h2>Фон, который не трогаем</h2></div>
+  <div class="bgrow">
+    <div class="bgitem"><h3>Счастливые часы</h3><p>Пн–Пт, 11:00–16:00, тот же недельный цикл с баннерами. Акции ноября идут вечером и в выходные, чтобы не перебивать дневной спрос.</p></div>
+    <div class="bgitem"><h3>Ролл в подарок</h3><p>От 1 400 ₽ один ролл, от 2 000 ₽ два. Остаётся при всех кодах, кроме Чёрной пятницы (там скидка уже 25%).</p></div>
+    <div class="bgitem"><h3>Бонусы 3/5/7%</h3><p>Списание до 10% заказа. С промокодами не суммируются, это правило оставляем как есть.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Календарь</span><h2>Ноябрь по дням</h2><p class="muted" style="font-size:13.5px">Нажмите на событие, чтобы перейти к описанию.</p></div>
+  <div class="legend">
+    <span><i style="background:var(--promo)"></i>Акция</span>
+    <span><i style="background:var(--raffle)"></i>Розыгрыш</span>
+    <span><i style="background:var(--sms)"></i>SMS-рассылка</span>
+    <span><i style="background:var(--hol)"></i>Дата / праздник</span>
+  </div>
+  <div class="cal-scroll"><div class="cal" id="cal"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Скидки и подарки</span><h2>Акции</h2></div>
+  <div class="list">
+
+    <article class="card k-promo" id="vmeste">
+      <div class="card-top"><h3>4 ноября: едим вместе</h3><span class="when">ср 4.11, весь день</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>−15% на все сеты и комбо по промокоду</dd>
+        <dt>Промокод</dt><dd><code>ВМЕСТЕ</code></dd>
+        <dt>Зачем</dt><dd>Выходной день, люди собираются компаниями. Крупный чек, скидку отбиваем объёмом.</dd>
+        <dt>Анонс</dt><dd>Вт 3.11 вечером во всех соцсетях, в ср утром сторис IG и пост ВК</dd>
+      </dl>
+      <div class="copy">Завтра выходной, а готовить на всех никто не обещал.
+4 ноября сеты и комбо на 15% дешевле.
+Промокод: ВМЕСТЕ</div>
+    </article>
+
+    <article class="card k-promo" id="d1111">
+      <div class="card-top"><h3>11.11</h3><span class="when">ср 11.11, весь день</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>−11% на весь заказ от 1 500 ₽</dd>
+        <dt>Промокод</dt><dd><code>1111</code></dd>
+        <dt>Зачем</dt><dd>Дату все знают по маркетплейсам, объяснять ничего не нужно. Порог 1 500 ₽ поднимает средний чек.</dd>
+      </dl>
+    </article>
+
+    <article class="card k-promo" id="p13">
+      <div class="card-top"><h3>Пятница 13-е</h3><span class="when">пт 13.11, с 16:00</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>−13% на сеты, только вечер пятницы</dd>
+        <dt>Промокод</dt><dd><code>ПЯТНИЦА13</code></dd>
+        <dt>Зачем</dt><dd>Повод для шутки в голосе Ниндошки и вечерний пятничный заказ на компанию</dd>
+      </dl>
+      <div class="copy">Говорят, в пятницу 13-е лучше не выходить из дома.
+Мы согласны. Сеты сегодня на 13% дешевле.
+Промокод: ПЯТНИЦА13</div>
+    </article>
+
+    <article class="card k-promo" id="junior">
+      <div class="card-top"><h3>Выходные для детей</h3><span class="when">пт 20.11 – вс 22.11</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>Пицца Ниндзя Джуниор −20%</dd>
+        <dt>Промокод</dt><dd><code>ДЖУНИОР</code></dd>
+        <dt>Зачем</dt><dd>20 ноября Всемирный день ребёнка. Джуниор ещё не показывали в ротации, заодно знакомим с позицией.</dd>
+      </dl>
+    </article>
+
+    <article class="card k-promo" id="bf">
+      <div class="card-top"><h3>Чёрная пятница</h3><span class="when">пт 27.11; для VIP с чт 26.11</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>−25% на три сета: Кайфовый, Чикен Чилл, Фреш. Ролл в подарок в этот день не даём.</dd>
+        <dt>Промокод</dt><dd><code>ЧЁРНАЯ</code> (продублировать <code>CHERNAYA</code>, если в Goulash проблемы с буквой Ё)</dd>
+        <dt>Зачем</dt><dd>Самая громкая скидка месяца. Сеты выбраны из тех, что ещё не показывали.</dd>
+        <dt>Ранний доступ</dt><dd>Чт 26.11 SMS сегментам VIP и Ядро: код работает для них на день раньше</dd>
+      </dl>
+    </article>
+
+    <article class="card k-promo" id="mama">
+      <div class="card-top"><h3>День матери</h3><span class="when">вс 29.11</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>Чизкейк в подарок к заказу от 1 500 ₽</dd>
+        <dt>Промокод</dt><dd><code>МАМЕ</code></dd>
+        <dt>Проверить</dt><dd>Маржу чизкейка по ABC-анализу. Если ниже 80%, заменить на онигири или мини-пиццу из листа «Кандидаты в подарок».</dd>
+      </dl>
+    </article>
+
+    <article class="card k-promo" id="ny">
+      <div class="card-top"><h3>Старт новогодних предзаказов</h3><span class="when">пн 30.11</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>Анонс: заказ на 31 декабря можно оформить заранее и выбрать время доставки</dd>
+        <dt>Зачем</dt><dd>31-го кухня перегружена. Предзаказы распределяют нагрузку и закрепляют гостя за нами до того, как он посмотрит конкурентов.</dd>
+      </dl>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">CRM, Goulash</span><h2>SMS-рассылки по сегментам</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Дата</th><th>Сегмент (№ выборки)</th><th class="n">Гостей</th><th>Что отправляем</th></tr></thead>
+    <tbody>
+      <tr><td>пн 16.11</td><td>Спящие 45–90 дней (1647)</td><td class="n">415</td><td>Код <code>СКУЧАЕМ</code>, ролл Кани Спешл</td></tr>
+      <tr><td>пн 16.11</td><td>Засыпающий (1653)</td><td class="n">147</td><td>Код <code>ЗАГЛЯНИ</code>, ролл Краб Криспи</td></tr>
+      <tr><td>пн 16.11</td><td>Разовый под угрозой (1649)</td><td class="n">91</td><td>Код <code>ВЕРНИСЬ</code>, пицца Кавабанга</td></tr>
+      <tr><td>ср 18.11</td><td>Новичок (1648)</td><td class="n">105</td><td>Новый код <code>ВТОРОЙ</code>: −10% на второй заказ до 30.11</td></tr>
+      <tr><td>чт 26.11</td><td>VIP (1652) + Ядро (1651)</td><td class="n">602</td><td>Ранний доступ к Чёрной пятнице, код <code>ЧЁРНАЯ</code></td></tr>
+    </tbody>
+  </table></div>
+  <p class="foot">Количество гостей на 27.08.2026. Выборки с автообновлением, перед отправкой цифры будут другими. Потерянных (1654, 4 445 гостей) в ноябре не трогаем: дорого по SMS, лучше отдельная акция в декабре.</p>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Все площадки, призы из меню</span><h2>Розыгрыши</h2></div>
+  <div class="list">
+
+    <article class="card k-raffle" id="r-vk1">
+      <div class="card-top"><h3>Репост к празднику</h3><span class="when">2.11 – 8.11, итоги вс 8.11 в 19:00</span></div>
+      <dl class="kv">
+        <dt>Площадка</dt><dd><span class="plat"><span>ВКонтакте</span></span> · 16 000 охват</dd>
+        <dt>Условия</dt><dd>Подписка на группу + репост записи</dd>
+        <dt>Приз</dt><dd>Сет Огромный (1 890 ₽)</dd>
+        <dt>Зачем</dt><dd>Самая большая аудитория, репосты приводят новых подписчиков из Можги</dd>
+      </dl>
+    </article>
+
+    <article class="card k-raffle" id="r-ig">
+      <div class="card-top"><h3>Отметь, с кем делишь последний кусок</h3><span class="when">9.11 – 15.11, итоги вс 15.11</span></div>
+      <dl class="kv">
+        <dt>Площадка</dt><dd><span class="plat"><span>Instagram</span></span> · 2 000 охват</dd>
+        <dt>Условия</dt><dd>Подписка + отметка друга в комментарии</dd>
+        <dt>Приз</dt><dd>Сет На Вайбе (1 215 ₽)</dd>
+      </dl>
+    </article>
+
+    <article class="card k-raffle" id="r-tg">
+      <div class="card-top"><h3>Квиз «Угадай ролл по разрезу»</h3><span class="when">10.11 – 13.11, итоги пт 13.11</span></div>
+      <dl class="kv">
+        <dt>Площадка</dt><dd><span class="plat"><span>Telegram</span></span> · 500 охват</dd>
+        <dt>Условия</dt><dd>Три фото роллов в разрезе, ответы в комментариях. Среди всех, кто угадал три из трёх, разыгрываем приз.</dd>
+        <dt>Приз</dt><dd>2 пиццы Пепперони 30 см (2 × 575 ₽)</dd>
+      </dl>
+    </article>
+
+    <article class="card k-raffle" id="r-max">
+      <div class="card-top"><h3>Что заказать на выходные</h3><span class="when">16.11 – 22.11, итоги вс 22.11</span></div>
+      <dl class="kv">
+        <dt>Площадка</dt><dd><span class="plat"><span>MAX</span></span> · 160 охват</dd>
+        <dt>Условия</dt><dd>Подписка + ответ в комментариях</dd>
+        <dt>Приз</dt><dd>Пицца Цыплёнок Барбекю 30 см (625 ₽)</dd>
+        <dt>Зачем</dt><dd>Канал маленький, шанс выиграть высокий. Об этом пишем в анонсе в ВК и TG, чтобы перетянуть подписчиков в MAX.</dd>
+      </dl>
+    </article>
+
+    <article class="card k-raffle" id="r-otz">
+      <div class="card-top"><h3>Отзыв с фото</h3><span class="when">2.11 – 29.11, итоги пн 30.11</span></div>
+      <dl class="kv">
+        <dt>Площадка</dt><dd><span class="plat"><span>ВКонтакте</span></span> (отзывы / обсуждение)</dd>
+        <dt>Условия</dt><dd>Отзыв о заказе с фото еды. Каждый отзыв = один участник.</dd>
+        <dt>Приз</dt><dd>Сет Хит New (1 790 ₽)</dd>
+        <dt>Зачем</dt><dd>Живые фото гостей для контента и отзывы, которые видят новые покупатели</dd>
+      </dl>
+    </article>
+
+    <article class="card k-raffle" id="r-mama">
+      <div class="card-top"><h3>Что мама готовила лучше всех</h3><span class="when">23.11 – 29.11, итоги вс 29.11</span></div>
+      <dl class="kv">
+        <dt>Площадка</dt><dd><span class="plat"><span>ВКонтакте</span><span>Instagram</span></span> · общий розыгрыш</dd>
+        <dt>Условия</dt><dd>Подписка + история в комментариях</dd>
+        <dt>Приз</dt><dd>Сет Любимый (1 690 ₽) с доставкой маме</dd>
+        <dt>Зачем</dt><dd>Тёплые комментарии, которые потом можно собрать в пост ко Дню матери</dd>
+      </dl>
+    </article>
+
+  </div>
+  <p class="foot">Итоги подводим в прямом эфире или записью экрана рандомайзера. Условия и дату итогов пишем в самом посте. Победитель забирает приз в течение 14 дней.</p>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Экономика</span><h2>Сколько это стоит</h2></div>
+  <div class="two">
+    <div class="tbl-wrap"><table style="min-width:0">
+      <thead><tr><th>Скидка</th><th class="n">Маржа после</th></tr></thead>
+      <tbody>
+        <tr><td>Без скидки</td><td class="n">79%</td></tr>
+        <tr><td>−11% (11.11)</td><td class="n">76%</td></tr>
+        <tr><td>−13% (пятница 13-е)</td><td class="n">76%</td></tr>
+        <tr><td>−15% (4 ноября)</td><td class="n">75%</td></tr>
+        <tr><td>−20% (Джуниор)</td><td class="n">74%</td></tr>
+        <tr><td>−25% (Чёрная пятница)</td><td class="n">72%</td></tr>
+      </tbody>
+    </table></div>
+    <div class="tbl-wrap"><table style="min-width:0">
+      <thead><tr><th>Призы</th><th class="n">По меню</th><th class="n">Себест.</th></tr></thead>
+      <tbody>
+        <tr><td>Сет Огромный</td><td class="n">1 890 ₽</td><td class="n">397 ₽</td></tr>
+        <tr><td>Сет Хит New</td><td class="n">1 790 ₽</td><td class="n">376 ₽</td></tr>
+        <tr><td>Сет Любимый</td><td class="n">1 690 ₽</td><td class="n">355 ₽</td></tr>
+        <tr><td>Сет На Вайбе</td><td class="n">1 215 ₽</td><td class="n">255 ₽</td></tr>
+        <tr><td>2 × Пепперони 30 см</td><td class="n">1 150 ₽</td><td class="n">242 ₽</td></tr>
+        <tr><td>Цыплёнок Барбекю 30 см</td><td class="n">625 ₽</td><td class="n">131 ₽</td></tr>
+      </tbody>
+      <tfoot><tr><td>Итого</td><td class="n">8 360 ₽</td><td class="n">1 756 ₽</td></tr></tfoot>
+    </table></div>
+  </div>
+  <p class="foot">Расчёт по средней продуктовой марже меню 79% (ABC-анализ Goulash, 06.08.2026), себестоимость = 21% цены. Доставка призов в расчёт не входит. Цены призов взяты из текущих баннеров, перед запуском сверить с сайтом.</p>
+</section>
+
+<section>
+  <div class="two">
+    <div class="box">
+      <span class="eyebrow">Правила для всех акций</span>
+      <ul>
+        <li>Промокоды не суммируются между собой и с бонусами</li>
+        <li>Минимальный заказ на доставку остаётся 1 000 ₽</li>
+        <li>Хиты группы A (Цыпа, Чикен хот, Чикен лайт) в подарки не ставим</li>
+        <li>По каждому коду в начале декабря смотрим в Goulash: сколько заказов, средний чек, сколько новых гостей</li>
+      </ul>
+    </div>
+    <div class="box">
+      <span class="eyebrow">Настроить в Goulash до 1 ноября</span>
+      <ul class="checks" id="checks">
+        <li><input type="checkbox" id="g1"><label for="g1">Коды ВМЕСТЕ, 1111, ПЯТНИЦА13 с датами действия</label></li>
+        <li><input type="checkbox" id="g2"><label for="g2">Коды ДЖУНИОР, ЧЁРНАЯ (+CHERNAYA), МАМЕ, ВТОРОЙ</label></li>
+        <li><input type="checkbox" id="g3"><label for="g3">ЧЁРНАЯ: доступ с 26.11 только для выборок 1651 и 1652</label></li>
+        <li><input type="checkbox" id="g4"><label for="g4">Отключить ролл в подарок на 27.11</label></li>
+        <li><input type="checkbox" id="g5"><label for="g5">Продлить СКУЧАЕМ, ЗАГЛЯНИ, ВЕРНИСЬ до 30.11</label></li>
+        <li><input type="checkbox" id="g6"><label for="g6">Проверить маржу чизкейка для акции 29.11</label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+  // события ноября 2026: [день, тип, текст, якорь]
+  const ev = {
+    2:[["raffle","Старт: репост ВК","r-vk1"],["raffle","Старт: отзыв с фото","r-otz"]],
+    3:[["promo","Анонс 4 ноября","vmeste"]],
+    4:[["hol","День народного единства",""],["promo","−15% сеты и комбо","vmeste"]],
+    8:[["raffle","Итоги ВК","r-vk1"]],
+    9:[["raffle","Старт: розыгрыш IG","r-ig"]],
+    10:[["raffle","Старт: квиз TG","r-tg"]],
+    11:[["promo","11.11 · −11% от 1 500 ₽","d1111"]],
+    13:[["promo","Пятница 13-е · −13% сеты","p13"],["raffle","Итоги квиза TG","r-tg"]],
+    15:[["raffle","Итоги IG","r-ig"]],
+    16:[["sms","SMS: спящие, засыпающие, разовые",""],["raffle","Старт: розыгрыш MAX","r-max"]],
+    18:[["sms","SMS новичкам: ВТОРОЙ",""]],
+    20:[["hol","День ребёнка",""],["promo","Джуниор −20%","junior"]],
+    21:[["promo","Джуниор −20%","junior"]],
+    22:[["promo","Джуниор −20%","junior"],["raffle","Итоги MAX","r-max"]],
+    23:[["raffle","Старт: День матери ВК+IG","r-mama"]],
+    26:[["sms","SMS VIP: ранний доступ","bf"]],
+    27:[["hol","Чёрная пятница",""],["promo","−25% на 3 сета","bf"]],
+    29:[["hol","День матери",""],["promo","Чизкейк в подарок","mama"],["raffle","Итоги День матери","r-mama"]],
+    30:[["raffle","Итоги: отзыв с фото","r-otz"],["promo","Предзаказы на НГ","ny"]]
+  };
+  const cal = document.getElementById("cal");
+  ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].forEach(d=>{const e=document.createElement("div");e.className="dow";e.textContent=d;cal.appendChild(e);});
+  // 1 ноября 2026 — воскресенье: 6 пустых ячеек
+  for(let i=0;i<6;i++){const e=document.createElement("div");e.className="day off";cal.appendChild(e);}
+  for(let d=1; d<=30; d++){
+    const col=(6+d-1)%7; const cell=document.createElement("div");
+    cell.className="day"+(col>=5?" we":"");
+    const n=document.createElement("span");n.className="num";n.textContent=d;cell.appendChild(n);
+    (ev[d]||[]).forEach(([t,txt,id])=>{
+      const c=document.createElement(id?"a":"span");c.className="chip c-"+t;c.textContent=txt;
+      if(id) c.href="#"+id; cell.appendChild(c);
+    });
+    cal.appendChild(cell);
+  }
+  for(let i=0;i<6;i++){const e=document.createElement("div");e.className="day off";cal.appendChild(e);}
+  // чек-лист: запоминаем отметки в этом браузере
+  document.querySelectorAll("#checks input").forEach(cb=>{
+    try{ cb.checked = localStorage.getItem("nin-"+cb.id)==="1"; }catch(e){}
+    cb.addEventListener("change",()=>{ try{ localStorage.setItem("nin-"+cb.id, cb.checked?"1":"0"); }catch(e){} });
+  });
+})();
+</script>
+
+</body>
+</html>

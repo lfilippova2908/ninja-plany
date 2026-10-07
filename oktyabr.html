@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Октябрьские акции Ниндзя</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: шапка с итогами → фон месяца → календарь-сетка (пн–вс) → карточки акций по датам → розыгрыши → экономика → чек-лист Goulash */
+:root{
+  --bg:#f3f6f2; --surface:#ffffff; --surface2:#eaf0e9; --ink:#15211a; --muted:#5a6a60; --line:#d8e1d8;
+  --accent:#1c8c4c; --accent-soft:#dcefe2;
+  --promo:#c8571f; --promo-soft:#fbe7dc;
+  --raffle:#6d45c9; --raffle-soft:#ece5fb;
+  --sms:#2470a8; --sms-soft:#e0edf7;
+  --hol:#9a6a00; --hol-soft:#fbf0d2;
+  --f-display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body:"Onest", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1512; --surface:#17201b; --surface2:#1d2822; --ink:#e7efe9; --muted:#9aab9f; --line:#2b3830;
+  --accent:#5fd08e; --accent-soft:#1d3527;
+  --promo:#f08a52; --promo-soft:#3a2418;
+  --raffle:#a98bf0; --raffle-soft:#2a2240;
+  --sms:#6db3e8; --sms-soft:#172c3c;
+  --hol:#e3b847; --hol-soft:#332a12; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0f1512; --surface:#17201b; --surface2:#1d2822; --ink:#e7efe9; --muted:#9aab9f; --line:#2b3830;
+  --accent:#5fd08e; --accent-soft:#1d3527;
+  --promo:#f08a52; --promo-soft:#3a2418;
+  --raffle:#a98bf0; --raffle-soft:#2a2240;
+  --sms:#6db3e8; --sms-soft:#172c3c;
+  --hol:#e3b847; --hol-soft:#332a12; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:36px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(26px,5vw,40px);font-weight:700}
+h2{font-size:20px;font-weight:700}
+h3{font-size:15px;font-weight:600;font-family:var(--f-body)}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+section{display:grid;gap:14px}
+.sec-head{display:grid;gap:4px}
+
+/* header */
+header{display:grid;gap:14px}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:2px;min-width:0}
+.stat b{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+/* background mechanics */
+.bgrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.bgitem{background:var(--surface2);border-radius:10px;padding:12px 14px;display:grid;gap:4px;min-width:0}
+.bgitem p{font-size:13.5px}
+
+/* legend + chips */
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chip{display:block;font-size:11.5px;line-height:1.3;padding:3px 6px;border-radius:5px;text-decoration:none;font-weight:500}
+.c-promo{background:var(--promo-soft);color:var(--promo)}
+.c-raffle{background:var(--raffle-soft);color:var(--raffle)}
+.c-sms{background:var(--sms-soft);color:var(--sms)}
+.c-hol{background:var(--hol-soft);color:var(--hol)}
+a.chip:hover,a.chip:focus-visible{outline:2px solid currentColor;outline-offset:1px}
+
+/* calendar */
+.cal-scroll{overflow-x:auto}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(118px,1fr));gap:6px;min-width:860px}
+.dow{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 4px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;min-height:96px;display:flex;flex-direction:column;gap:4px}
+.day.off{background:transparent;border-style:dashed;opacity:.5}
+.day.we .num{color:var(--promo)}
+.num{font-family:var(--f-display);font-size:14px;font-variant-numeric:tabular-nums}
+
+/* cards */
+.list{display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:10px;scroll-margin-top:16px}
+.card:target{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.card-top{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline;justify-content:space-between}
+.when{font-family:var(--f-display);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;min-width:0}
+@media(max-width:560px){.kv{grid-template-columns:1fr;gap:2px}.kv dd{margin-bottom:6px}}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--surface2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.plat{display:inline-flex;gap:6px;flex-wrap:wrap}
+.plat span{font-size:11.5px;font-weight:700;border:1px solid var(--line);border-radius:99px;padding:1px 8px;color:var(--muted)}
+.copy{font-size:14px;background:var(--surface2);border-radius:8px;padding:10px 12px;white-space:pre-line}
+.k-promo{border-left:4px solid var(--promo)}
+.k-raffle{border-left:4px solid var(--raffle)}
+.k-sms{border-left:4px solid var(--sms)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tfoot td{font-weight:700}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px;min-width:0}
+.box ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:14px}
+.checks{list-style:none;padding:0!important}
+.checks li{display:flex;gap:8px;align-items:flex-start}
+.checks input{margin-top:4px;accent-color:var(--accent);width:16px;height:16px;flex:0 0 auto}
+.checks label{cursor:pointer}
+.foot{font-size:13px;color:var(--muted)}
+</style>
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<p style="max-width:1080px;margin:16px auto 0;padding-inline:16px;font-size:14px"><a href="index.html" style="color:var(--accent)">← Все планы</a></p>
+
+<style>.day.past{opacity:.45}.c-plan{background:var(--accent-soft);color:var(--accent)}.c-max{background:var(--raffle-soft);color:var(--raffle);font-weight:700}</style>
+<div class="wrap">
+
+<header>
+  <span class="eyebrow">Ниндзя · Можга · 12–31 октября 2026</span>
+  <h1>Акции и розыгрыши до конца октября</h1>
+  <p class="muted" style="max-width:68ch">Главная площадка месяца MAX. Голосования, коды и розыгрыши живут только там. ВК, Instagram, Telegram, SMS и вкладыш в заказ показывают, что происходит, и ведут ссылкой в MAX. Свою жизнь в других соцсетях не бросаем: сторис Счастливых часов, обычные посты, один розыгрыш в TG в неделю.</p>
+  <div class="stats">
+    <div class="stat"><b>160 → 300</b><span>подписчиков MAX к 31.10, ориентир</span></div>
+    <div class="stat"><b>3</b><span>битвы недели, голосуют только в MAX</span></div>
+    <div class="stat"><b>6</b><span>розыгрышей в MAX, 3 в TG</span></div>
+    <div class="stat"><b>до 1 000 ₽</b><span>себестоимость всех призов</span></div>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Главное</span><h2>Как переводим людей в MAX</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Откуда</th><th>Что делаем</th></tr></thead>
+    <tbody>
+      <tr><td>Каждый заказ</td><td>Вкладыш с QR: «Каждую пятницу дарим роллы подписчикам MAX». Курьер говорит то же вслух. Это главный источник, работает с 12.10.</td></tr>
+      <tr><td>ВКонтакте, 16 000</td><td>Пн пост-анонс битвы: «Голосуем в MAX, ссылка». Пт итоги с напоминанием, что код получили только голосовавшие в MAX. Ссылка на MAX в закрепе и в меню группы.</td></tr>
+      <tr><td>Instagram, 2 000</td><td>Сторис с опросом битвы, на последнем слайде ссылка-стикер на MAX. Ссылка на MAX в шапке профиля.</td></tr>
+      <tr><td>Telegram, 520</td><td>Анонсы битвы и донесения со ссылкой. В подвале каждого поста ссылка на MAX уже есть.</td></tr>
+      <tr><td>SMS</td><td>В конце каждой SMS-волны строка: «Коды каждую неделю в нашем MAX» и короткая ссылка</td></tr>
+      <tr><td>Сайт и приложение</td><td>Баннер «Секретные коды только в MAX» и push 1 раз в неделю</td></tr>
+    </tbody>
+  </table></div>
+  <p class="foot">Код для голосовавших и кодовое слово донесения публикуем только в MAX. В других соцсетях пишем, что код есть, но не показываем его. Так у подписки появляется причина.</p>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Работает весь месяц</span><h2>Фон, который не трогаем</h2></div>
+  <div class="bgrow">
+    <div class="bgitem"><h3>Счастливые часы</h3><p>Пн–Пт 11:00–16:00, −25% на позиции дня. Сторис в IG и TG каждый будний день, в MAX один закреп на неделю.</p></div>
+    <div class="bgitem"><h3>Ролл в подарок</h3><p>От 1 400 ₽ один ролл, от 2 000 ₽ два, автоматически. Остаётся при всех кодах октября.</p></div>
+    <div class="bgitem"><h3>Обычный контент</h3><p>ВК, IG и TG продолжают жить по недельным контент-планам. Анонсы MAX встраиваются в них, а не заменяют.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Календарь</span><h2>Октябрь по дням</h2><p class="muted" style="font-size:13.5px">Нажмите на событие, чтобы перейти к описанию.</p></div>
+  <div class="legend">
+    <span><i style="background:var(--raffle)"></i>Событие в MAX</span>
+    <span><i style="background:var(--promo)"></i>Скидка / акция</span>
+    <span><i style="background:var(--sms)"></i>SMS / другие соцсети</span>
+    <span><i style="background:var(--hol)"></i>Дата</span>
+    <span><i style="background:var(--accent)"></i>Готовый контент-план</span>
+  </div>
+  <div class="cal-scroll"><div class="cal" id="cal"></div></div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Каждую неделю одинаково</span><h2>Ритм недели</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>День</th><th>В MAX</th><th>В других каналах</th></tr></thead>
+    <tbody>
+      <tr><td>Пн</td><td>Открываем битву недели, голосование реакцией</td><td>ВК, IG-сторис, TG: анонс битвы со ссылкой на MAX. TG: старт розыгрыша за репост.</td></tr>
+      <tr><td>Ср</td><td>Секретное донесение: кодовое слово, онигири к заказу всем, кто его ввёл</td><td>TG и IG-сторис: «В MAX вышло донесение, код только там»</td></tr>
+      <tr><td>Чт 17:00</td><td>—</td><td>SMS-волна по сегменту, в конце ссылка на MAX</td></tr>
+      <tr><td>Пт 19:00</td><td>Итоги битвы и код для голосовавших. Розыгрыш среди подписчиков: ролл к заказу.</td><td>ВК и TG: итоги битвы без кода. TG: итоги своего розыгрыша.</td></tr>
+      <tr><td>Сб–Вс</td><td>Скидка −20% на победителя по коду</td><td>Обычные посты выходных</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Скидки в MAX</span><h2>Битвы недели</h2></div>
+  <div class="list">
+
+    <article class="card k-promo" id="w1">
+      <div class="card-top"><h3>Сет Фреш против Сета Мини</h3><span class="when">голосуем 12–16.10, скидка 17–18.10</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>Голосуют реакцией в MAX. В пятницу код на −20% к победителю получают все голосовавшие, он действует в выходные.</dd>
+        <dt>Промокод</dt><dd><code>ФРЕШ20</code> или <code>МИНИ20</code>, заводим оба, включаем один</dd>
+        <dt>Цена и маржа</dt><dd>Фреш 690 ₽, маржа 84% → 80% после скидки. Мини 799 ₽, 82% → 78%.</dd>
+      </dl>
+      <div class="copy">MAX:
+Две коробки, один вечер.
+Фреш: классика с огурцом, лососем и курицей.
+Мини: две темпуры, с крабом и с креветкой.
+Голосуйте реакцией до пятницы. За кем будет больше, тот в выходные на 20% дешевле. Код получат все, кто проголосовал.
+
+ВК / TG:
+В MAX спорим, какой сет лучше: Фреш или Мини. Кто проголосует, получит код на −20% к победителю. Голосовать здесь: {ссылка на MAX}</div>
+    </article>
+
+    <article class="card k-promo" id="w2">
+      <div class="card-top"><h3>Урамаки с ананасами против Фрай чиз</h3><span class="when">голосуем 19–23.10, скидка 24–25.10</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>Та же: голосование в MAX, код для голосовавших на выходные</dd>
+        <dt>Промокод</dt><dd><code>УРАМАКИ20</code> или <code>ФРАЙ20</code></dd>
+        <dt>Маржа</dt><dd>У обоих 87% → 84% после скидки</dd>
+      </dl>
+    </article>
+
+    <article class="card k-promo" id="w3">
+      <div class="card-top"><h3>Хэллоуин: Шредер против Крэнга</h3><span class="when">голосуем 26–30.10, скидка 31.10</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>Пиццы названы в честь злодеев из «Черепашек-ниндзя». Голосование в MAX, победитель −20% в субботу 31.10 для голосовавших.</dd>
+        <dt>Промокод</dt><dd><code>ЗЛОДЕЙ</code></dd>
+        <dt>Маржа</dt><dd>Крэнг 79% → 74%. Шредер 76% → 70%.</dd>
+      </dl>
+      <div class="copy">Хэллоуин у нас без тыкв. У нас злодеи.
+Шредер или Крэнг? Голосуйте реакцией до пятницы.
+Победитель 31 октября на 20% дешевле для всех, кто голосовал.</div>
+    </article>
+
+    <article class="card k-promo" id="sladost">
+      <div class="card-top"><h3>Сладость или гадость</h3><span class="when">сб 31.10, код выходит в MAX в 10:00</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>По коду к любому заказу кладём сюрприз: онигири, классический ролл или мини-пиццу 25 см, что выберет кухня</dd>
+        <dt>Промокод</dt><dd><code>ГАДОСТЬ</code>, публикуем только в MAX. В ВК, IG и TG пост: «Сегодня в MAX хэллоуинский код, ссылка».</dd>
+        <dt>Правило</dt><dd>Один промокод на заказ: ЗЛОДЕЙ или ГАДОСТЬ. Автоподарок от 1 400 ₽ остаётся. Хиты группы A не кладём.</dd>
+      </dl>
+    </article>
+
+  </div>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Призы из меню</span><h2>Розыгрыши</h2></div>
+  <div class="list">
+
+    <article class="card k-raffle" id="r-max">
+      <div class="card-top"><h3>Пятничный розыгрыш MAX</h3><span class="when">итоги пт 16 и 23.10 в 19:00</span></div>
+      <dl class="kv">
+        <dt>Условия</dt><dd>Подписка на MAX + реакция под постом. Победитель по рандомайзеру, скрин в канал.</dd>
+        <dt>Приз</dt><dd>Ролл из «Кандидатов в подарок», кладём к заказу победителя, забрать за 7 дней</dd>
+        <dt>Анонс</dt><dd>Каждую пятницу в ВК и TG: «Сегодня в 19:00 в MAX разыгрываем ролл»</dd>
+      </dl>
+    </article>
+
+    <article class="card k-raffle" id="r-big">
+      <div class="card-top"><h3>Большой хэллоуинский розыгрыш в MAX</h3><span class="when">26–31.10, итоги сб 31.10 в 19:00</span></div>
+      <dl class="kv">
+        <dt>Условия</dt><dd>Подписка на MAX + реакция под постом. Участвовать можно только в MAX.</dd>
+        <dt>Приз</dt><dd>Сет Симба (1 445 ₽, маржа 81%) и Сет Мини (799 ₽) вторым призом</dd>
+        <dt>Где зовём</dt><dd>ВК (16 000) пост с репостом, IG пост + сторис, TG пост. Везде одна мысль: «Самый большой розыгрыш месяца идёт в MAX».</dd>
+        <dt>Зачем</dt><dd>Крупный приз, чтобы из ВК перешли те, кто не сдвинулся ради ролла</dd>
+      </dl>
+    </article>
+
+    <article class="card k-raffle" id="r-don">
+      <div class="card-top"><h3>Секретное донесение №4, №5, №6</h3><span class="when">ср 14, 21 и 28.10</span></div>
+      <dl class="kv">
+        <dt>Механика</dt><dd>Кодовое слово только в MAX. Все, кто закажет с ним до воскресенья, получают онигири к заказу. Награда всем, без рандома.</dd>
+        <dt>Коды</dt><dd>Новое слово каждую неделю, в №6 хэллоуинское: <code>ТЕНЬ</code></dd>
+      </dl>
+    </article>
+
+    <article class="card k-raffle" id="r-tg">
+      <div class="card-top"><h3>Репост в сторис, Telegram</h3><span class="when">итоги пт 16, 23 и 30.10</span></div>
+      <dl class="kv">
+        <dt>Условия</dt><dd>Подписка + репост поста себе в сторис</dd>
+        <dt>Приз</dt><dd>Мини-пицца 25 см к заказу победителя</dd>
+        <dt>Зачем</dt><dd>TG тоже растим: сторис подписчиков поднимают просмотры. В посте с итогами ссылка на MAX.</dd>
+      </dl>
+    </article>
+
+  </div>
+  <p class="foot">Фото-конкурсы и творческие задания не берём: в Можге их почти не делают. Все механики в один тап.</p>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">CRM, Goulash</span><h2>SMS по плану возврата</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Дата</th><th>Сегмент (№ выборки)</th><th class="n">Гостей</th><th>Что отправляем</th></tr></thead>
+    <tbody>
+      <tr><td>чт 15.10, 17:00</td><td>Спящие 45–90 (1647) + часть Потерянных (1654) как тест</td><td class="n">415 + ~500</td><td><code>СКУЧАЕМ</code> Кани Спешл, <code>ВЕРНИСЬ</code> Кавабанга от 1 300 ₽. Срок до 25.10. В конце ссылка на MAX.</td></tr>
+      <tr><td>чт 22.10, 17:00</td><td>Те же, кто ещё не заказал</td><td class="n">—</td><td>Напоминание: подарок сгорает 25.10</td></tr>
+      <tr><td>чт 29.10, 17:00</td><td>Засыпающий (1653) + Разовый под угрозой (1649)</td><td class="n">147 + 91</td><td><code>ЗАГЛЯНИ</code> Краб Криспи, ролл Фрай чиз. Срок до 5.11. В конце ссылка на MAX.</td></tr>
+    </tbody>
+  </table></div>
+  <p class="foot">Если волна 1 уже уходила, 15.10 пропускаем. Ссылка на MAX удлиняет SMS: проверить, что сообщение влезает в 2 части.</p>
+</section>
+
+<section>
+  <div class="sec-head"><span class="eyebrow">Экономика</span><h2>Сколько это стоит</h2></div>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Приз</th><th class="n">Сколько раз</th><th class="n">Себест.</th></tr></thead>
+    <tbody>
+      <tr><td>Ролл из «Кандидатов в подарок» (MAX)</td><td class="n">2</td><td class="n">до 240 ₽</td></tr>
+      <tr><td>Сет Симба (MAX, Хэллоуин)</td><td class="n">1</td><td class="n">275 ₽</td></tr>
+      <tr><td>Сет Мини (MAX, Хэллоуин)</td><td class="n">1</td><td class="n">144 ₽</td></tr>
+      <tr><td>Мини-пицца 25 см (TG)</td><td class="n">3</td><td class="n">до 360 ₽</td></tr>
+    </tbody>
+    <tfoot><tr><td>Итого</td><td class="n">7 призов</td><td class="n">до 1 019 ₽</td></tr></tfoot>
+  </table></div>
+  <p class="foot">Онигири по донесениям и сюрпризы 31.10 сюда не входят, их число зависит от заказов. Себестоимость каждого 8–120 ₽. Маржи из ABC-анализа Goulash 06.08.2026.</p>
+</section>
+
+<section>
+  <div class="two">
+    <div class="box">
+      <span class="eyebrow">Что считаем каждую пятницу</span>
+      <ul>
+        <li>Подписчики MAX: сколько было, сколько стало</li>
+        <li>Сколько голосов в битве и сколько заказов по коду битвы</li>
+        <li>Сколько заказов с кодом донесения</li>
+        <li>Переходы по ссылке на MAX из ВК, TG и SMS (короткие ссылки vk.cc считают клики)</li>
+      </ul>
+    </div>
+    <div class="box">
+      <span class="eyebrow">Подготовить до 12 октября</span>
+      <ul class="checks" id="checks">
+        <li><input type="checkbox" id="o1"><label for="o1">Заказать вкладыши с QR на канал MAX</label></li>
+        <li><input type="checkbox" id="o7"><label for="o7">Ссылка на MAX в закрепе ВК, меню группы и шапке IG</label></li>
+        <li><input type="checkbox" id="o8"><label for="o8">Отдельные короткие ссылки на MAX для ВК, TG, IG и SMS</label></li>
+        <li><input type="checkbox" id="o2"><label for="o2">Завести коды битв: ФРЕШ20, МИНИ20, УРАМАКИ20, ФРАЙ20, ЗЛОДЕЙ</label></li>
+        <li><input type="checkbox" id="o3"><label for="o3">Завести ГАДОСТЬ на 31.10 и коды донесений №4–6</label></li>
+        <li><input type="checkbox" id="o5"><label for="o5">Договориться с кухней, что кладём в «сюрприз» 31.10</label></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function(){
+  const ev = {
+    8:[["plan","Контент-план 5–11.10",""]],9:[["plan","Контент-план 5–11.10",""]],10:[["plan","Контент-план 5–11.10",""]],11:[["plan","Контент-план 5–11.10",""]],
+    12:[["max","MAX: битва Фреш vs Мини","w1"],["sms","ВК/IG/TG: анонс → MAX",""],["sms","Старт вкладышей с QR",""]],
+    14:[["max","MAX: донесение №4","r-don"]],
+    15:[["sms","SMS: спящие + потерянные",""]],
+    16:[["max","MAX: итоги + ролл","r-max"],["sms","TG: итоги репоста","r-tg"]],
+    17:[["promo","Победитель −20%","w1"]],18:[["promo","Победитель −20%","w1"]],
+    19:[["max","MAX: битва Урамаки vs Фрай чиз","w2"],["sms","ВК/IG/TG: анонс → MAX",""]],
+    21:[["max","MAX: донесение №5","r-don"]],
+    22:[["sms","SMS: напоминание",""]],
+    23:[["max","MAX: итоги + ролл","r-max"],["sms","TG: итоги репоста","r-tg"]],
+    24:[["promo","Победитель −20%","w2"]],25:[["promo","Победитель −20%","w2"]],
+    26:[["max","MAX: битва злодеев","w3"],["max","MAX: старт большого розыгрыша","r-big"],["sms","ВК/IG/TG: зовём в MAX",""]],
+    28:[["max","MAX: донесение №6","r-don"]],
+    29:[["sms","SMS: засыпающие + разовые",""]],
+    30:[["max","MAX: итоги битвы","w3"],["sms","TG: итоги репоста","r-tg"]],
+    31:[["hol","Хэллоуин",""],["promo","ЗЛОДЕЙ −20%","w3"],["max","MAX: код ГАДОСТЬ","sladost"],["max","MAX: итоги Симбы","r-big"]]
+  };
+  const cal=document.getElementById("cal");
+  ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"].forEach(d=>{const e=document.createElement("div");e.className="dow";e.textContent=d;cal.appendChild(e);});
+  for(let i=0;i<3;i++){const e=document.createElement("div");e.className="day off";cal.appendChild(e);}
+  for(let d=1;d<=31;d++){
+    const col=(3+d-1)%7, cell=document.createElement("div");
+    cell.className="day"+(col>=5?" we":"")+(d<8?" past":"");
+    const n=document.createElement("span");n.className="num";n.textContent=d;cell.appendChild(n);
+    (ev[d]||[]).forEach(([t,txt,id])=>{const c=document.createElement(id?"a":"span");c.className="chip c-"+t;c.textContent=txt;if(id)c.href="#"+id;cell.appendChild(c);});
+    cal.appendChild(cell);
+  }
+  const e=document.createElement("div");e.className="day off";cal.appendChild(e);
+  document.querySelectorAll("#checks input").forEach(cb=>{
+    try{cb.checked=localStorage.getItem("ninokt-"+cb.id)==="1";}catch(x){}
+    cb.addEventListener("change",()=>{try{localStorage.setItem("ninokt-"+cb.id,cb.checked?"1":"0");}catch(x){}});
+  });
+})();
+</script>
+
+</body>
+</html>

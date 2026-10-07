@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Планы акций Ниндзя</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Onest:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: шапка с итогами → фон месяца → календарь-сетка (пн–вс) → карточки акций по датам → розыгрыши → экономика → чек-лист Goulash */
+:root{
+  --bg:#f3f6f2; --surface:#ffffff; --surface2:#eaf0e9; --ink:#15211a; --muted:#5a6a60; --line:#d8e1d8;
+  --accent:#1c8c4c; --accent-soft:#dcefe2;
+  --promo:#c8571f; --promo-soft:#fbe7dc;
+  --raffle:#6d45c9; --raffle-soft:#ece5fb;
+  --sms:#2470a8; --sms-soft:#e0edf7;
+  --hol:#9a6a00; --hol-soft:#fbf0d2;
+  --f-display:"Unbounded", "Arial Black", system-ui, sans-serif;
+  --f-body:"Onest", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1512; --surface:#17201b; --surface2:#1d2822; --ink:#e7efe9; --muted:#9aab9f; --line:#2b3830;
+  --accent:#5fd08e; --accent-soft:#1d3527;
+  --promo:#f08a52; --promo-soft:#3a2418;
+  --raffle:#a98bf0; --raffle-soft:#2a2240;
+  --sms:#6db3e8; --sms-soft:#172c3c;
+  --hol:#e3b847; --hol-soft:#332a12; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0f1512; --surface:#17201b; --surface2:#1d2822; --ink:#e7efe9; --muted:#9aab9f; --line:#2b3830;
+  --accent:#5fd08e; --accent-soft:#1d3527;
+  --promo:#f08a52; --promo-soft:#3a2418;
+  --raffle:#a98bf0; --raffle-soft:#2a2240;
+  --sms:#6db3e8; --sms-soft:#172c3c;
+  --hol:#e3b847; --hol-soft:#332a12; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:grid;gap:36px}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(26px,5vw,40px);font-weight:700}
+h2{font-size:20px;font-weight:700}
+h3{font-size:15px;font-weight:600;font-family:var(--f-body)}
+p{margin:0}
+.eyebrow{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.muted{color:var(--muted)}
+section{display:grid;gap:14px}
+.sec-head{display:grid;gap:4px}
+
+/* header */
+header{display:grid;gap:14px}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:grid;gap:2px;min-width:0}
+.stat b{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted)}
+
+/* background mechanics */
+.bgrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.bgitem{background:var(--surface2);border-radius:10px;padding:12px 14px;display:grid;gap:4px;min-width:0}
+.bgitem p{font-size:13.5px}
+
+/* legend + chips */
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.chip{display:block;font-size:11.5px;line-height:1.3;padding:3px 6px;border-radius:5px;text-decoration:none;font-weight:500}
+.c-promo{background:var(--promo-soft);color:var(--promo)}
+.c-raffle{background:var(--raffle-soft);color:var(--raffle)}
+.c-sms{background:var(--sms-soft);color:var(--sms)}
+.c-hol{background:var(--hol-soft);color:var(--hol)}
+a.chip:hover,a.chip:focus-visible{outline:2px solid currentColor;outline-offset:1px}
+
+/* calendar */
+.cal-scroll{overflow-x:auto}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(118px,1fr));gap:6px;min-width:860px}
+.dow{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:0 4px}
+.day{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:6px;min-height:96px;display:flex;flex-direction:column;gap:4px}
+.day.off{background:transparent;border-style:dashed;opacity:.5}
+.day.we .num{color:var(--promo)}
+.num{font-family:var(--f-display);font-size:14px;font-variant-numeric:tabular-nums}
+
+/* cards */
+.list{display:grid;gap:12px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:10px;scroll-margin-top:16px}
+.card:target{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.card-top{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:baseline;justify-content:space-between}
+.when{font-family:var(--f-display);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0;min-width:0}
+@media(max-width:560px){.kv{grid-template-columns:1fr;gap:2px}.kv dd{margin-bottom:6px}}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;background:var(--surface2);border:1px solid var(--line);border-radius:5px;padding:1px 6px}
+.plat{display:inline-flex;gap:6px;flex-wrap:wrap}
+.plat span{font-size:11.5px;font-weight:700;border:1px solid var(--line);border-radius:99px;padding:1px 8px;color:var(--muted)}
+.copy{font-size:14px;background:var(--surface2);border-radius:8px;padding:10px 12px;white-space:pre-line}
+.k-promo{border-left:4px solid var(--promo)}
+.k-raffle{border-left:4px solid var(--raffle)}
+.k-sms{border-left:4px solid var(--sms)}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:560px}
+th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tfoot td{font-weight:700}
+
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:grid;gap:8px;min-width:0}
+.box ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:14px}
+.checks{list-style:none;padding:0!important}
+.checks li{display:flex;gap:8px;align-items:flex-start}
+.checks input{margin-top:4px;accent-color:var(--accent);width:16px;height:16px;flex:0 0 auto}
+.checks label{cursor:pointer}
+.foot{font-size:13px;color:var(--muted)}
+</style>
+<style>html{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <span class="eyebrow">Ниндзя · Можга</span>
+  <h1>Планы акций и розыгрышей</h1>
+  <p class="muted" style="max-width:68ch">Здесь собраны планы по месяцам. Нажмите на месяц, чтобы открыть календарь, акции, розыгрыши и расчёт призов.</p>
+</header>
+<div class="list">
+  <a class="card k-raffle" href="oktyabr.html" style="text-decoration:none;color:inherit">
+    <div class="card-top"><h3>Октябрь 2026</h3><span class="when">12–31 октября</span></div>
+    <p class="muted">Упор на MAX: битвы недели, Секретные донесения, большой хэллоуинский розыгрыш</p>
+  </a>
+  <a class="card k-promo" href="noyabr.html" style="text-decoration:none;color:inherit">
+    <div class="card-top"><h3>Ноябрь 2026</h3><span class="when">1–30 ноября</span></div>
+    <p class="muted">4 ноября, 11.11, Чёрная пятница, День матери</p>
+  </a>
+</div>
+</div>
+</body>
+</html>
